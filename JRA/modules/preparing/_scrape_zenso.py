@@ -4,6 +4,7 @@ from tqdm.notebook import tqdm
 import requests
 import pandas as pd
 import bs4
+from modules.constants import LocalPaths
 
 class LoopSleeper:
     def __init__(self):
@@ -66,7 +67,7 @@ def extract_index_info(html: str, race_id: str) -> pd.DataFrame:
         df["馬番"] = range(1, len(df) + 1)
     return df
 
-def scrape_zenso(race_id_list: list, dirpath : str = 'h:\\Codes\\keibaAI\\data\\shisu_html', extension: str = '.html') -> pd.DataFrame:
+def scrape_zenso(race_id_list: list, dirpath : str = LocalPaths.BASE_DIR + 'data/shisu_html', extension: str = '.html') -> pd.DataFrame:
     df_list = []
     
     for race_id in tqdm(race_id_list):
@@ -87,9 +88,3 @@ def scrape_zenso(race_id_list: list, dirpath : str = 'h:\\Codes\\keibaAI\\data\\
         df = extract_index_info(html, race_id)
         df_list.append(df)
     return pd.concat(df_list)
-
-dirpath = 'h:\\Codes\\keibaAI\\data\\shisu_html'
-os.makedirs(dirpath, exist_ok=True)  # ディレクトリを作る
-
-
-# index_info = run(race_id_list, dirpath)

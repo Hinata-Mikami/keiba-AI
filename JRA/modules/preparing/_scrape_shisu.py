@@ -5,6 +5,7 @@ import requests
 import pandas as pd
 import bs4
 import re  # ここを追加
+from modules.constants import LocalPaths
 
 
 class LoopSleeper:
@@ -92,7 +93,7 @@ def extract_index_info(html: str, race_id: str) -> pd.DataFrame:
         df["馬番"] = range(1, len(df) + 1)
     return df
 
-def scrape_shisu(race_id_list: list, dirpath : str = 'h:\\Codes\\keibaAI\\data\\shisu_html', extension: str = '.html') -> pd.DataFrame:
+def scrape_shisu(race_id_list: list, dirpath : str = LocalPaths.BASE_DIR + 'data/shisu_html', extension: str = '.html') -> pd.DataFrame:
     df_list = []
     
     for race_id in tqdm(race_id_list):
@@ -114,7 +115,7 @@ def scrape_shisu(race_id_list: list, dirpath : str = 'h:\\Codes\\keibaAI\\data\\
         df_list.append(df)
     return pd.concat(df_list)
 
-def get_ninki(race_id_list: list, dirpath : str = 'h:\\Codes\\keibaAI\\data\\shisu_html', extension: str = '.html') -> pd.DataFrame:
+def get_ninki(race_id_list: list, dirpath : str = LocalPaths.BASE_DIR + 'data/shisu_html', extension: str = '.html') -> pd.DataFrame:
     df_list = []
     
     for race_id in tqdm(race_id_list):

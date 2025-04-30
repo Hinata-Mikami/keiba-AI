@@ -6,6 +6,7 @@ import pandas as pd
 from bs4 import BeautifulSoup
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
+from modules.constants import UrlPaths, LocalPaths
 
 class LoopSleeper:
     def __init__(self):
@@ -47,7 +48,7 @@ loop_sleeper = LoopSleeper()
 def scrape_premium(race_id: str, skip) -> pd.DataFrame:
     url = 'https://race.netkeiba.com/race/speed.html?race_id='+race_id+'&rf=shutuba_submenu'
     
-    dirpath : str = 'h:\\Codes\\keibaAI\\data\\timeshisu_html'
+    dirpath : str = LocalPaths.BASE_DIR + 'data/timeshisu_html'
     
     # Login credentials
     USER = "mikami1354@icloud.com"

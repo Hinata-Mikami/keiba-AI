@@ -5,7 +5,7 @@ import dataclasses
 class LocalPaths:
     # パス
     ## プロジェクトルートの絶対パス
-    BASE_DIR: str = os.path.abspath('./')
+    BASE_DIR: str = os.path.abspath('h:/AIData/JRA/')
     ## dataディレクトリまでの絶対パス
     DATA_DIR: str = os.path.join(BASE_DIR, 'data')
     ### HTMLディレクトリのパス

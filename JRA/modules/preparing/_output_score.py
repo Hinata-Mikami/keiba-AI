@@ -42,9 +42,9 @@ peds_processor = preprocessing.PedsProcessor(filepath=LocalPaths.RAW_PEDS_PATH)
 
 def output_score(race_day_list):
     
-    keiba_ai = training.KeibaAIFactory.load('models/20241004/basemodel_shisu_v5.5.pickle') 
+    keiba_ai = training.KeibaAIFactory.load(LocalPaths.BASE_DIR + 'models/20241004/basemodel_shisu_v5.5.pickle') 
     # 一時的に出馬表を保存するパスを指定
-    filepath = 'data/tmp/shutuba.pickle'
+    filepath = LocalPaths.BASE_DIR + 'data/tmp/shutuba.pickle'
     
     
     for day in race_day_list:
@@ -139,7 +139,7 @@ def output_score(race_day_list):
                 
 def calc_score(day, race_id_list, keiba_ai, keiba_ai2, keiba_ai3, keiba_ai4):
 
-    filepath = 'data/tmp/shutuba.pickle'
+    filepath = LocalPaths.BASE_DIR + 'data/tmp/shutuba.pickle'
     today = today = day[0:4]+'/'+day[4:6]+'/'+day[6:8]
         
 
