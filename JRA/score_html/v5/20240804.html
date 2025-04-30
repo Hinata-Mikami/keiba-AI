@@ -1,0 +1,2253 @@
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/foundation/6.4.3/css/foundation.min.css" rel="stylesheet"/>
+    <link href="https://cdn.datatables.net/v/zf/jq-3.6.0/dt-1.13.4/b-2.3.6/b-html5-2.3.6/date-1.4.1/fh-3.3.2/sb-1.4.2/datatables.min.css" rel="stylesheet"/>
+    
+    <script src="https://cdn.datatables.net/v/zf/jq-3.6.0/dt-1.13.4/b-2.3.6/b-html5-2.3.6/date-1.4.1/fh-3.3.2/sb-1.4.2/datatables.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/foundation/6.4.3/js/foundation.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            $('.my-table').DataTable({
+                select: true,
+                displayLength: 20,
+                buttons: ['copy'],
+                fixedHeader: true,
+                dom: 'iQrtBlp',
+            });
+        });
+    </script>
+
+    <style>
+        /* 全体のフォントと背景色 */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+        /* ヘッダーとサマリーのスタイル */
+        .header-title {
+            font-size: 2.5em;
+            margin: 20px 0;
+            color: #333;
+            text-align: center;
+        }
+        .summary-title {
+            font-size: 2.5em;
+            margin: 10px 0;
+            color: #444;
+        }
+        /* テーブルのスタイル */
+        .my-table {
+            font-size: 0.7em;
+            width: 90%;
+            margin: 20px 0;
+            height: 20px; /* 行の高さを固定 */
+            line-height: 20px; /* 行の高さに合わせて縦方向の中央揃え */
+            /*overflow: hidden;  セルからはみ出したテキストを隠す */
+            white-space: nowrap;  /*テキストを折り返さず1行にする */
+            text-overflow: ellipsis; /* 省略記号(...)を表示 */
+        }
+        /* レース情報のスタイル */
+        .race-info {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            color: #555;
+        }
+        /* 大きなフォントサイズのクラス */
+        .large-font {
+            font-size: 1.5em; /* 大きなフォントサイズを指定 */
+            color: #222;
+        }
+        
+         /* 枠の色 */
+        .frame-1 { background-color: white; }
+        .frame-2 { background-color: black; color: white; }
+        .frame-3 { background-color: red; color: white; }
+        .frame-4 { background-color: blue; color: white; }
+        .frame-5 { background-color: yellow; }
+        .frame-6 { background-color: green; color: white; }
+        .frame-7 { background-color: orange; color: white; }
+        .frame-8 { background-color: pink; }
+
+        /* スコア色分け */
+        .highest { background-color: Tomato; }
+        .top-25 { background-color: Yellow; }
+        .bottom-25 { background-color: #90D7EC; }
+        /* 特定値の色分け */
+        .value-1 { background-color: yellow; }
+        .value-2 { background-color: skyblue; }
+        .value-3 { background-color: orange; }
+
+        /* 範囲色分け */
+        .range-low { background-color: Tomato; }
+        .range-high { background-color: skyblue; }
+    </style>
+    
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // すべてのテーブルを取得
+            const tables = document.querySelectorAll('.my-table');
+
+            tables.forEach(table => {
+                // 「枠」列の色を設定（列インデックス1が「枠」）
+                table.querySelectorAll('tbody tr').forEach(row => {
+                    const frameCell = row.cells[1]; // 「枠」列の位置（1列目がインデックス0）
+                    const frameValue = frameCell.textContent.trim();
+                    frameCell.classList.add('frame-' + frameValue);
+                });
+
+                // 色付けする列のインデックスと列名を定義
+                const scoreColumns = [3, 4, 5, 13, 14, 15, 16, 17, 18, 19, 20, 21];
+                const specificValueColumn = 6;
+                const rangeColumn = 7;
+
+                // スコア列の色付け
+                scoreColumns.forEach(colIndex => {
+                    const cells = Array.from(table.querySelectorAll(`tbody tr td:nth-child(${colIndex + 1})`));
+                    const values = cells.map(cell => parseFloat(cell.textContent) || 0).sort((a, b) => a - b);
+
+                    const max = values[values.length - 1];
+                    const top25Threshold = values[Math.floor(values.length * 0.75)];
+                    const top50Threshold = values[Math.floor(values.length * 0.50)];
+                    const bottom25Threshold = values[Math.floor(values.length * 0.25)];
+
+                    cells.forEach(cell => {
+                        const cellValue = parseFloat(cell.textContent) || 0;
+                        if (cellValue === max) {
+                            cell.classList.add('highest');
+                        } else if (cellValue >= top25Threshold) {
+                            cell.classList.add('top-25');
+                        } else if (cellValue <= bottom25Threshold) {
+                            cell.classList.add('bottom-25');
+                        }
+                    });
+                });
+
+                // 特定値に基づく色分け（列インデックス 5）
+                table.querySelectorAll(`tbody tr td:nth-child(${specificValueColumn + 1})`).forEach(cell => {
+                    const cellValue = parseInt(cell.textContent, 10);
+                    if (cellValue === 1) {
+                        cell.classList.add('value-1');
+                    } else if (cellValue === 2) {
+                        cell.classList.add('value-2');
+                    } else if (cellValue === 3) {
+                        cell.classList.add('value-3');
+                    }
+                });
+
+                // 範囲に基づく色分け（列インデックス 6）
+                table.querySelectorAll(`tbody tr td:nth-child(${rangeColumn + 1})`).forEach(cell => {
+                    const cellValue = parseFloat(cell.textContent) || 0;
+                    if (cellValue < 10) {
+                        cell.classList.add('range-low');
+                    } else if (cellValue >= 100) {
+                        cell.classList.add('range-high');
+                    }
+                });
+            });
+        });
+    </script>
+
+    
+    <header>
+        <div class="header-title"> 20240804 SUMMARY </div>
+        <div class="summary-title"> 今日の狙い目レース </div>
+    </header>
+    
+        <!DOCTYPE html>
+        <html lang="ja">
+        <head>
+            <meta charset="Shift-JIS">
+        </head>
+        <body>
+            <header>
+                <font size="5">
+                    Point : 21 札幌09R 0:00発走 <br></font>
+                <font size="4">
+                    ◎:8(9人気/36.0) 〇:7(7人気/30.8)  ▲:10(5人気/33.5)  △I:11(想定1/47.1)  △II:5(2人気/42.4)<br>
+                </font>
+            </header>
+        </body>
+        </html>
+        
+        <!DOCTYPE html>
+        <html lang="ja">
+        <head>
+            <meta charset="Shift-JIS">
+        </head>
+        <body>
+            <header>
+                <font size="5">
+                    Point : 12 札幌10R 0:00発走 <br></font>
+                <font size="4">
+                    ◎:15(3人気/33.8) 〇:13(1人気/32.9)  ▲:3(8人気/23.4)  △I:10(想定14/23.7)  △II:9(2人気/20.2)<br>
+                </font>
+            </header>
+        </body>
+        </html>
+        
+        <!DOCTYPE html>
+        <html lang="ja">
+        <head>
+            <meta charset="Shift-JIS">
+        </head>
+        <body>
+            <header>
+                <font size="5">
+                    Point : 14 札幌11R 0:00発走 <br></font>
+                <font size="4">
+                    ◎:9(5人気/57.6) 〇:2(7人気/59.6)  ▲:4(2人気/50.9)  △I:12(想定10/54.5)  △II:1(8人気/50.0)<br>
+                </font>
+            </header>
+        </body>
+        </html>
+        <br><br> 
+            <div class="race-info">
+                <head><span class="large-font">
+                札幌09R 0:00発走 芝1800m 2勝クラス <br>
+                </span></head>
+                Point : 21<br>
+                AI ver5.3 + ver5.5<br>
+                ◎:5(2人気) 〇:1(3人気)  ▲:2(6人気)  △I:8(9人気)  △II:7(7人気)<br>
+                AI ver5.5<br>
+                ◎:8(9人気) 〇:7(7人気)  ▲:10(5人気)  △I:11(1人気)  △II:5(2人気)<br>
+            </div>
+            <table border="1" class="dataframe my-table">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>枠</th>
+      <th>馬番</th>
+      <th>AI Score</th>
+      <th>AI (v5.3)</th>
+      <th>AI (v5.5)</th>
+      <th>人 気</th>
+      <th>単勝 オッズ</th>
+      <th>馬名</th>
+      <th>性齢</th>
+      <th>斤量</th>
+      <th>騎手</th>
+      <th>脚質</th>
+      <th>最 高</th>
+      <th>平均</th>
+      <th>前走</th>
+      <th>上り指MAX</th>
+      <th>上り指AVG</th>
+      <th>上り指1R</th>
+      <th>スピ指MAX</th>
+      <th>スピ指AVG</th>
+      <th>スピ指1R</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>1</td>
+      <td>1</td>
+      <td>68.4</td>
+      <td>37.6</td>
+      <td>30.8</td>
+      <td>3</td>
+      <td>6.0</td>
+      <td>テイデ</td>
+      <td>セ6</td>
+      <td>58.0</td>
+      <td>佐々木大輔</td>
+      <td>差</td>
+      <td>96</td>
+      <td>93</td>
+      <td>94</td>
+      <td>27.0</td>
+      <td>11.0</td>
+      <td>14.0</td>
+      <td>110.0</td>
+      <td>96.0</td>
+      <td>98.0</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2</td>
+      <td>2</td>
+      <td>67.7</td>
+      <td>34.2</td>
+      <td>33.5</td>
+      <td>6</td>
+      <td>7.9</td>
+      <td>エグランタイン</td>
+      <td>牝5</td>
+      <td>56.0</td>
+      <td>鮫島克駿</td>
+      <td>先</td>
+      <td>98</td>
+      <td>88</td>
+      <td>79</td>
+      <td>26.0</td>
+      <td>11.0</td>
+      <td>11.0</td>
+      <td>103.0</td>
+      <td>91.0</td>
+      <td>79.0</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>3</td>
+      <td>3</td>
+      <td>28.8</td>
+      <td>10.0</td>
+      <td>18.8</td>
+      <td>10</td>
+      <td>31.2</td>
+      <td>ユイ</td>
+      <td>牝5</td>
+      <td>56.0</td>
+      <td>富田暁</td>
+      <td>先</td>
+      <td>89</td>
+      <td>82</td>
+      <td>87</td>
+      <td>12.0</td>
+      <td>1.0</td>
+      <td>12.0</td>
+      <td>97.0</td>
+      <td>74.0</td>
+      <td>87.0</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>3</td>
+      <td>4</td>
+      <td>30.4</td>
+      <td>7.1</td>
+      <td>23.3</td>
+      <td>12</td>
+      <td>52.0</td>
+      <td>マンクスホップ</td>
+      <td>牝5</td>
+      <td>56.0</td>
+      <td>斎藤新</td>
+      <td>先</td>
+      <td>94</td>
+      <td>85</td>
+      <td>78</td>
+      <td>17.0</td>
+      <td>9.0</td>
+      <td>7.0</td>
+      <td>106.0</td>
+      <td>89.0</td>
+      <td>78.0</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>4</td>
+      <td>5</td>
+      <td>75.5</td>
+      <td>39.5</td>
+      <td>36.0</td>
+      <td>2</td>
+      <td>5.9</td>
+      <td>マチカゼ</td>
+      <td>牡4</td>
+      <td>58.0</td>
+      <td>武豊</td>
+      <td>先</td>
+      <td>101</td>
+      <td>92</td>
+      <td>85</td>
+      <td>10.0</td>
+      <td>7.0</td>
+      <td>7.0</td>
+      <td>114.0</td>
+      <td>100.0</td>
+      <td>86.0</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>4</td>
+      <td>6</td>
+      <td>45.9</td>
+      <td>20.9</td>
+      <td>25.0</td>
+      <td>8</td>
+      <td>12.9</td>
+      <td>ノレッジビューティ</td>
+      <td>牝4</td>
+      <td>56.0</td>
+      <td>岩田康誠</td>
+      <td>先</td>
+      <td>91</td>
+      <td>81</td>
+      <td>87</td>
+      <td>12.0</td>
+      <td>5.0</td>
+      <td>8.0</td>
+      <td>92.0</td>
+      <td>79.0</td>
+      <td>92.0</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>5</td>
+      <td>7</td>
+      <td>65.3</td>
+      <td>22.9</td>
+      <td>42.4</td>
+      <td>7</td>
+      <td>10.9</td>
+      <td>ピンクジン</td>
+      <td>牝4</td>
+      <td>56.0</td>
+      <td>黛弘人</td>
+      <td>差</td>
+      <td>100</td>
+      <td>88</td>
+      <td>86</td>
+      <td>18.0</td>
+      <td>12.0</td>
+      <td>15.0</td>
+      <td>101.0</td>
+      <td>93.0</td>
+      <td>87.0</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>5</td>
+      <td>8</td>
+      <td>66.2</td>
+      <td>19.1</td>
+      <td>47.1</td>
+      <td>9</td>
+      <td>26.0</td>
+      <td>スカーズ</td>
+      <td>牡4</td>
+      <td>58.0</td>
+      <td>浜中俊</td>
+      <td>先</td>
+      <td>100</td>
+      <td>92</td>
+      <td>92</td>
+      <td>18.0</td>
+      <td>12.0</td>
+      <td>14.0</td>
+      <td>121.0</td>
+      <td>98.0</td>
+      <td>98.0</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>6</td>
+      <td>9</td>
+      <td>25.5</td>
+      <td>6.1</td>
+      <td>19.4</td>
+      <td>14</td>
+      <td>138.8</td>
+      <td>ヴァンルーラー</td>
+      <td>牝5</td>
+      <td>56.0</td>
+      <td>小林勝太</td>
+      <td>先</td>
+      <td>95</td>
+      <td>85</td>
+      <td>90</td>
+      <td>12.0</td>
+      <td>-1.0</td>
+      <td>4.0</td>
+      <td>91.0</td>
+      <td>86.0</td>
+      <td>84.0</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>6</td>
+      <td>10</td>
+      <td>63.5</td>
+      <td>22.4</td>
+      <td>41.1</td>
+      <td>5</td>
+      <td>7.9</td>
+      <td>スカイフォール</td>
+      <td>牡5</td>
+      <td>58.0</td>
+      <td>丹内祐次</td>
+      <td>先</td>
+      <td>94</td>
+      <td>89</td>
+      <td>94</td>
+      <td>21.0</td>
+      <td>17.0</td>
+      <td>11.0</td>
+      <td>110.0</td>
+      <td>96.0</td>
+      <td>100.0</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>7</td>
+      <td>11</td>
+      <td>60.9</td>
+      <td>21.5</td>
+      <td>39.4</td>
+      <td>1</td>
+      <td>4.6</td>
+      <td>エリダヌス</td>
+      <td>牝4</td>
+      <td>56.0</td>
+      <td>横山武史</td>
+      <td>先</td>
+      <td>92</td>
+      <td>88</td>
+      <td>91</td>
+      <td>20.0</td>
+      <td>13.0</td>
+      <td>20.0</td>
+      <td>110.0</td>
+      <td>90.0</td>
+      <td>90.0</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>7</td>
+      <td>12</td>
+      <td>54.4</td>
+      <td>21.6</td>
+      <td>32.8</td>
+      <td>4</td>
+      <td>6.3</td>
+      <td>アマイ</td>
+      <td>牝4</td>
+      <td>56.0</td>
+      <td>永野猛蔵</td>
+      <td>先</td>
+      <td>92</td>
+      <td>86</td>
+      <td>92</td>
+      <td>16.0</td>
+      <td>7.0</td>
+      <td>16.0</td>
+      <td>103.0</td>
+      <td>91.0</td>
+      <td>92.0</td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>8</td>
+      <td>13</td>
+      <td>38.4</td>
+      <td>16.3</td>
+      <td>22.1</td>
+      <td>13</td>
+      <td>93.1</td>
+      <td>コパノアントニオ</td>
+      <td>牡3</td>
+      <td>55.0</td>
+      <td>高杉吏麒</td>
+      <td>差</td>
+      <td>80</td>
+      <td>80</td>
+      <td>81</td>
+      <td>4.0</td>
+      <td>-2.0</td>
+      <td>-7.0</td>
+      <td>104.0</td>
+      <td>93.0</td>
+      <td>92.0</td>
+    </tr>
+    <tr>
+      <th>13</th>
+      <td>8</td>
+      <td>14</td>
+      <td>14.5</td>
+      <td>5.5</td>
+      <td>9.0</td>
+      <td>11</td>
+      <td>50.9</td>
+      <td>ナリタザクラ</td>
+      <td>牡7</td>
+      <td>58.0</td>
+      <td>横山和生</td>
+      <td>差</td>
+      <td>91</td>
+      <td>80</td>
+      <td>76</td>
+      <td>26.0</td>
+      <td>4.0</td>
+      <td>-14.0</td>
+      <td>111.0</td>
+      <td>83.0</td>
+      <td>65.0</td>
+    </tr>
+  </tbody>
+</table><br><br>
+            <div class="race-info">
+                <head><span class="large-font">
+                札幌10R 0:00発走 芝1200m 2勝クラス <br>
+                </span></head>
+                Point : 12<br>
+                AI ver5.3 + ver5.5<br>
+                ◎:15(3人気) 〇:13(1人気)  ▲:11(5人気)  △I:8(6人気)  △II:4(4人気)<br>
+                AI ver5.5<br>
+                ◎:15(3人気) 〇:13(1人気)  ▲:3(8人気)  △I:10(14人気)  △II:9(2人気)<br>
+            </div>
+            <table border="1" class="dataframe my-table">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>枠</th>
+      <th>馬番</th>
+      <th>AI Score</th>
+      <th>AI (v5.3)</th>
+      <th>AI (v5.5)</th>
+      <th>人 気</th>
+      <th>単勝 オッズ</th>
+      <th>馬名</th>
+      <th>性齢</th>
+      <th>斤量</th>
+      <th>騎手</th>
+      <th>脚質</th>
+      <th>最 高</th>
+      <th>平均</th>
+      <th>前走</th>
+      <th>上り指MAX</th>
+      <th>上り指AVG</th>
+      <th>上り指1R</th>
+      <th>スピ指MAX</th>
+      <th>スピ指AVG</th>
+      <th>スピ指1R</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>1</td>
+      <td>1</td>
+      <td>30.5</td>
+      <td>11.0</td>
+      <td>19.5</td>
+      <td>7</td>
+      <td>13.7</td>
+      <td>カイカノキセキ</td>
+      <td>牝5</td>
+      <td>56.0</td>
+      <td>西村淳也</td>
+      <td>先</td>
+      <td>90</td>
+      <td>86</td>
+      <td>83</td>
+      <td>1.0</td>
+      <td>-7.0</td>
+      <td>1.0</td>
+      <td>91.0</td>
+      <td>77.0</td>
+      <td>91.0</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>1</td>
+      <td>2</td>
+      <td>31.7</td>
+      <td>6.2</td>
+      <td>25.5</td>
+      <td>15</td>
+      <td>59.7</td>
+      <td>トリップトゥムーン</td>
+      <td>牡5</td>
+      <td>58.0</td>
+      <td>佐々木大輔</td>
+      <td>追</td>
+      <td>94</td>
+      <td>85</td>
+      <td>79</td>
+      <td>25.0</td>
+      <td>10.0</td>
+      <td>8.0</td>
+      <td>107.0</td>
+      <td>88.0</td>
+      <td>90.0</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>2</td>
+      <td>3</td>
+      <td>51.1</td>
+      <td>22.6</td>
+      <td>28.5</td>
+      <td>8</td>
+      <td>16.5</td>
+      <td>スムースベルベット</td>
+      <td>牝4</td>
+      <td>56.0</td>
+      <td>黛弘人</td>
+      <td>先</td>
+      <td>100</td>
+      <td>87</td>
+      <td>91</td>
+      <td>9.0</td>
+      <td>-1.0</td>
+      <td>4.0</td>
+      <td>96.0</td>
+      <td>82.0</td>
+      <td>96.0</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>2</td>
+      <td>4</td>
+      <td>51.8</td>
+      <td>31.6</td>
+      <td>20.2</td>
+      <td>4</td>
+      <td>6.8</td>
+      <td>スイミーユニバンス</td>
+      <td>牝4</td>
+      <td>56.0</td>
+      <td>武豊</td>
+      <td>差</td>
+      <td>93</td>
+      <td>87</td>
+      <td>92</td>
+      <td>19.0</td>
+      <td>-3.0</td>
+      <td>19.0</td>
+      <td>98.0</td>
+      <td>85.0</td>
+      <td>96.0</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>3</td>
+      <td>5</td>
+      <td>30.7</td>
+      <td>13.6</td>
+      <td>17.1</td>
+      <td>11</td>
+      <td>33.0</td>
+      <td>アンビバレント</td>
+      <td>牡4</td>
+      <td>58.0</td>
+      <td>菱田裕二</td>
+      <td>先</td>
+      <td>96</td>
+      <td>78</td>
+      <td>74</td>
+      <td>18.0</td>
+      <td>-11.0</td>
+      <td>-12.0</td>
+      <td>104.0</td>
+      <td>83.0</td>
+      <td>86.0</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>3</td>
+      <td>6</td>
+      <td>41.1</td>
+      <td>16.6</td>
+      <td>24.5</td>
+      <td>9</td>
+      <td>19.2</td>
+      <td>ポルタフォルトゥナ</td>
+      <td>牝5</td>
+      <td>56.0</td>
+      <td>古川吉洋</td>
+      <td>先</td>
+      <td>93</td>
+      <td>90</td>
+      <td>84</td>
+      <td>7.0</td>
+      <td>1.0</td>
+      <td>0.0</td>
+      <td>103.0</td>
+      <td>97.0</td>
+      <td>92.0</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>4</td>
+      <td>7</td>
+      <td>37.6</td>
+      <td>18.0</td>
+      <td>19.6</td>
+      <td>16</td>
+      <td>59.7</td>
+      <td>ゴキゲンサン</td>
+      <td>牝4</td>
+      <td>56.0</td>
+      <td>永野猛蔵</td>
+      <td>先</td>
+      <td>95</td>
+      <td>87</td>
+      <td>78</td>
+      <td>8.0</td>
+      <td>-8.0</td>
+      <td>-2.0</td>
+      <td>97.0</td>
+      <td>88.0</td>
+      <td>86.0</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>4</td>
+      <td>8</td>
+      <td>52.3</td>
+      <td>28.6</td>
+      <td>23.7</td>
+      <td>6</td>
+      <td>10.5</td>
+      <td>コナブラック</td>
+      <td>牡5</td>
+      <td>58.0</td>
+      <td>亀田温心</td>
+      <td>先</td>
+      <td>100</td>
+      <td>89</td>
+      <td>79</td>
+      <td>5.0</td>
+      <td>-0.0</td>
+      <td>-1.0</td>
+      <td>112.0</td>
+      <td>92.0</td>
+      <td>87.0</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>5</td>
+      <td>9</td>
+      <td>46.3</td>
+      <td>19.8</td>
+      <td>26.5</td>
+      <td>2</td>
+      <td>5.2</td>
+      <td>ミズノコキュウ</td>
+      <td>牝5</td>
+      <td>56.0</td>
+      <td>丹内祐次</td>
+      <td>先</td>
+      <td>94</td>
+      <td>85</td>
+      <td>87</td>
+      <td>12.0</td>
+      <td>0.0</td>
+      <td>6.0</td>
+      <td>101.0</td>
+      <td>92.0</td>
+      <td>95.0</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>5</td>
+      <td>10</td>
+      <td>40.9</td>
+      <td>14.0</td>
+      <td>26.9</td>
+      <td>14</td>
+      <td>59.4</td>
+      <td>マルプリ</td>
+      <td>牝4</td>
+      <td>56.0</td>
+      <td>斎藤新</td>
+      <td>追</td>
+      <td>96</td>
+      <td>86</td>
+      <td>87</td>
+      <td>25.0</td>
+      <td>11.0</td>
+      <td>11.0</td>
+      <td>90.0</td>
+      <td>82.0</td>
+      <td>78.0</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>6</td>
+      <td>11</td>
+      <td>56.3</td>
+      <td>32.9</td>
+      <td>23.4</td>
+      <td>5</td>
+      <td>10.0</td>
+      <td>オルフェスト</td>
+      <td>牝4</td>
+      <td>56.0</td>
+      <td>丸山元気</td>
+      <td>先</td>
+      <td>97</td>
+      <td>89</td>
+      <td>82</td>
+      <td>3.0</td>
+      <td>-10.0</td>
+      <td>-1.0</td>
+      <td>99.0</td>
+      <td>80.0</td>
+      <td>99.0</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>6</td>
+      <td>12</td>
+      <td>29.9</td>
+      <td>7.1</td>
+      <td>22.8</td>
+      <td>12</td>
+      <td>34.8</td>
+      <td>ロゼクラン</td>
+      <td>牝6</td>
+      <td>56.0</td>
+      <td>荻野琢真</td>
+      <td>先</td>
+      <td>94</td>
+      <td>90</td>
+      <td>91</td>
+      <td>27.0</td>
+      <td>18.0</td>
+      <td>18.0</td>
+      <td>106.0</td>
+      <td>97.0</td>
+      <td>83.0</td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>7</td>
+      <td>13</td>
+      <td>60.8</td>
+      <td>27.9</td>
+      <td>32.9</td>
+      <td>1</td>
+      <td>4.7</td>
+      <td>ゴルトリッチ</td>
+      <td>牡4</td>
+      <td>58.0</td>
+      <td>横山武史</td>
+      <td>差</td>
+      <td>97</td>
+      <td>90</td>
+      <td>84</td>
+      <td>18.0</td>
+      <td>10.0</td>
+      <td>7.0</td>
+      <td>107.0</td>
+      <td>99.0</td>
+      <td>95.0</td>
+    </tr>
+    <tr>
+      <th>13</th>
+      <td>7</td>
+      <td>14</td>
+      <td>36.6</td>
+      <td>16.1</td>
+      <td>20.5</td>
+      <td>13</td>
+      <td>42.9</td>
+      <td>ヴィアドロローサ</td>
+      <td>牡5</td>
+      <td>58.0</td>
+      <td>北村友一</td>
+      <td>先</td>
+      <td>91</td>
+      <td>89</td>
+      <td>86</td>
+      <td>4.0</td>
+      <td>-10.0</td>
+      <td>4.0</td>
+      <td>104.0</td>
+      <td>87.0</td>
+      <td>95.0</td>
+    </tr>
+    <tr>
+      <th>14</th>
+      <td>8</td>
+      <td>15</td>
+      <td>67.6</td>
+      <td>33.8</td>
+      <td>33.8</td>
+      <td>3</td>
+      <td>6.5</td>
+      <td>ヤマニンアストロン</td>
+      <td>牡3</td>
+      <td>56.0</td>
+      <td>浜中俊</td>
+      <td>差</td>
+      <td>96</td>
+      <td>88</td>
+      <td>79</td>
+      <td>22.0</td>
+      <td>9.0</td>
+      <td>1.0</td>
+      <td>107.0</td>
+      <td>95.0</td>
+      <td>84.0</td>
+    </tr>
+    <tr>
+      <th>15</th>
+      <td>8</td>
+      <td>16</td>
+      <td>49.1</td>
+      <td>23.0</td>
+      <td>26.1</td>
+      <td>10</td>
+      <td>27.4</td>
+      <td>アップストローク</td>
+      <td>セ5</td>
+      <td>58.0</td>
+      <td>大野拓弥</td>
+      <td>差</td>
+      <td>96</td>
+      <td>86</td>
+      <td>80</td>
+      <td>21.0</td>
+      <td>10.0</td>
+      <td>8.0</td>
+      <td>107.0</td>
+      <td>91.0</td>
+      <td>92.0</td>
+    </tr>
+  </tbody>
+</table><br><br>
+            <div class="race-info">
+                <head><span class="large-font">
+                新潟06R 0:00発走 芝1000m 2勝クラス <br>
+                </span></head>
+                Point : 6<br>
+                AI ver5.3 + ver5.5<br>
+                ◎:11(3人気) 〇:16(1人気)  ▲:3(7人気)  △I:8(2人気)  △II:10(12人気)<br>
+                AI ver5.5<br>
+                ◎:8(2人気) 〇:16(1人気)  ▲:11(3人気)  △I:10(12人気)  △II:12(5人気)<br>
+            </div>
+            <table border="1" class="dataframe my-table">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>枠</th>
+      <th>馬番</th>
+      <th>AI Score</th>
+      <th>AI (v5.3)</th>
+      <th>AI (v5.5)</th>
+      <th>人 気</th>
+      <th>単勝 オッズ</th>
+      <th>馬名</th>
+      <th>性齢</th>
+      <th>斤量</th>
+      <th>騎手</th>
+      <th>脚質</th>
+      <th>最 高</th>
+      <th>平均</th>
+      <th>前走</th>
+      <th>上り指MAX</th>
+      <th>上り指AVG</th>
+      <th>上り指1R</th>
+      <th>スピ指MAX</th>
+      <th>スピ指AVG</th>
+      <th>スピ指1R</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>1</td>
+      <td>1</td>
+      <td>16.5</td>
+      <td>6.1</td>
+      <td>10.4</td>
+      <td>14</td>
+      <td>82.8</td>
+      <td>テンジュイン</td>
+      <td>牝7</td>
+      <td>56.0</td>
+      <td>坂井瑠星</td>
+      <td>先</td>
+      <td>96.0</td>
+      <td>90.0</td>
+      <td>89</td>
+      <td>19.0</td>
+      <td>0.0</td>
+      <td>-11.0</td>
+      <td>105.0</td>
+      <td>80.0</td>
+      <td>65.0</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>1</td>
+      <td>2</td>
+      <td>13.5</td>
+      <td>4.5</td>
+      <td>9.0</td>
+      <td>18</td>
+      <td>252.5</td>
+      <td>フクノワカバ</td>
+      <td>牝4</td>
+      <td>56.0</td>
+      <td>松岡正海</td>
+      <td>先</td>
+      <td>73.0</td>
+      <td>73.0</td>
+      <td>73</td>
+      <td>-18.0</td>
+      <td>-34.0</td>
+      <td>-19.0</td>
+      <td>85.0</td>
+      <td>64.0</td>
+      <td>85.0</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>2</td>
+      <td>3</td>
+      <td>57.3</td>
+      <td>30.3</td>
+      <td>27.0</td>
+      <td>7</td>
+      <td>17.6</td>
+      <td>アイヲツグモノ</td>
+      <td>牝4</td>
+      <td>56.0</td>
+      <td>菊沢一樹</td>
+      <td>追</td>
+      <td>94.0</td>
+      <td>85.0</td>
+      <td>94</td>
+      <td>16.0</td>
+      <td>-3.0</td>
+      <td>16.0</td>
+      <td>101.0</td>
+      <td>78.0</td>
+      <td>91.0</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>2</td>
+      <td>4</td>
+      <td>33.1</td>
+      <td>14.3</td>
+      <td>18.8</td>
+      <td>16</td>
+      <td>113.0</td>
+      <td>ヨール</td>
+      <td>牝5</td>
+      <td>56.0</td>
+      <td>嶋田純次</td>
+      <td>先</td>
+      <td>94.0</td>
+      <td>85.0</td>
+      <td>87</td>
+      <td>7.0</td>
+      <td>-7.0</td>
+      <td>3.0</td>
+      <td>96.0</td>
+      <td>79.0</td>
+      <td>84.0</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>3</td>
+      <td>5</td>
+      <td>35.0</td>
+      <td>14.7</td>
+      <td>20.3</td>
+      <td>11</td>
+      <td>41.4</td>
+      <td>オリアメンディ</td>
+      <td>牝6</td>
+      <td>56.0</td>
+      <td>内田博幸</td>
+      <td>差</td>
+      <td>99.0</td>
+      <td>86.0</td>
+      <td>89</td>
+      <td>12.0</td>
+      <td>-3.0</td>
+      <td>2.0</td>
+      <td>87.0</td>
+      <td>68.0</td>
+      <td>60.0</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>3</td>
+      <td>6</td>
+      <td>33.3</td>
+      <td>8.8</td>
+      <td>24.5</td>
+      <td>15</td>
+      <td>89.7</td>
+      <td>セイウンダマシイ</td>
+      <td>牡4</td>
+      <td>58.0</td>
+      <td>三浦皇成</td>
+      <td>先</td>
+      <td>96.0</td>
+      <td>82.0</td>
+      <td>82</td>
+      <td>18.0</td>
+      <td>3.0</td>
+      <td>18.0</td>
+      <td>92.0</td>
+      <td>80.0</td>
+      <td>92.0</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>4</td>
+      <td>7</td>
+      <td>16.5</td>
+      <td>7.4</td>
+      <td>9.1</td>
+      <td>13</td>
+      <td>50.9</td>
+      <td>トウカイファクター</td>
+      <td>セ5</td>
+      <td>58.0</td>
+      <td>Ｍ．デムーロ</td>
+      <td>先</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>84</td>
+      <td>-15.0</td>
+      <td>-22.0</td>
+      <td>-15.0</td>
+      <td>88.0</td>
+      <td>82.0</td>
+      <td>82.0</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>4</td>
+      <td>8</td>
+      <td>51.1</td>
+      <td>17.6</td>
+      <td>33.5</td>
+      <td>2</td>
+      <td>8.0</td>
+      <td>アサギリ</td>
+      <td>牝3</td>
+      <td>54.0</td>
+      <td>石川裕紀人</td>
+      <td>差</td>
+      <td>93.0</td>
+      <td>82.0</td>
+      <td>93</td>
+      <td>17.0</td>
+      <td>8.0</td>
+      <td>3.0</td>
+      <td>90.0</td>
+      <td>79.0</td>
+      <td>75.0</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>5</td>
+      <td>9</td>
+      <td>19.6</td>
+      <td>6.8</td>
+      <td>12.8</td>
+      <td>17</td>
+      <td>127.4</td>
+      <td>カジュフェイス</td>
+      <td>牡5</td>
+      <td>58.0</td>
+      <td>和田竜二</td>
+      <td>逃</td>
+      <td>83.0</td>
+      <td>83.0</td>
+      <td>69</td>
+      <td>2.0</td>
+      <td>-18.0</td>
+      <td>-22.0</td>
+      <td>102.0</td>
+      <td>77.0</td>
+      <td>62.0</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>5</td>
+      <td>10</td>
+      <td>50.3</td>
+      <td>22.3</td>
+      <td>28.0</td>
+      <td>12</td>
+      <td>43.2</td>
+      <td>セイウンハルカニ</td>
+      <td>牡5</td>
+      <td>58.0</td>
+      <td>松本大輝</td>
+      <td>先</td>
+      <td>99.0</td>
+      <td>99.0</td>
+      <td>99</td>
+      <td>5.0</td>
+      <td>-21.0</td>
+      <td>5.0</td>
+      <td>85.0</td>
+      <td>84.0</td>
+      <td>84.0</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>6</td>
+      <td>11</td>
+      <td>67.3</td>
+      <td>36.7</td>
+      <td>30.6</td>
+      <td>3</td>
+      <td>8.3</td>
+      <td>クインズコスモス</td>
+      <td>牝5</td>
+      <td>56.0</td>
+      <td>石橋脩</td>
+      <td>差</td>
+      <td>101.0</td>
+      <td>85.0</td>
+      <td>101</td>
+      <td>7.0</td>
+      <td>-10.0</td>
+      <td>3.0</td>
+      <td>99.0</td>
+      <td>68.0</td>
+      <td>83.0</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>6</td>
+      <td>12</td>
+      <td>41.6</td>
+      <td>14.0</td>
+      <td>27.6</td>
+      <td>5</td>
+      <td>10.9</td>
+      <td>オルコス</td>
+      <td>牝5</td>
+      <td>56.0</td>
+      <td>杉原誠人</td>
+      <td>差</td>
+      <td>98.0</td>
+      <td>98.0</td>
+      <td>98</td>
+      <td>23.0</td>
+      <td>-16.0</td>
+      <td>23.0</td>
+      <td>81.0</td>
+      <td>69.0</td>
+      <td>76.0</td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>7</td>
+      <td>13</td>
+      <td>21.5</td>
+      <td>9.1</td>
+      <td>12.4</td>
+      <td>9</td>
+      <td>20.1</td>
+      <td>フラッシュアーク</td>
+      <td>牝5</td>
+      <td>56.0</td>
+      <td>原優介</td>
+      <td>先</td>
+      <td>97.0</td>
+      <td>87.0</td>
+      <td>77</td>
+      <td>29.0</td>
+      <td>-5.0</td>
+      <td>29.0</td>
+      <td>89.0</td>
+      <td>75.0</td>
+      <td>83.0</td>
+    </tr>
+    <tr>
+      <th>13</th>
+      <td>7</td>
+      <td>14</td>
+      <td>12.6</td>
+      <td>5.9</td>
+      <td>6.7</td>
+      <td>10</td>
+      <td>39.8</td>
+      <td>キュートヘスティア</td>
+      <td>牝5</td>
+      <td>56.0</td>
+      <td>小沢大仁</td>
+      <td>先</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>78</td>
+      <td>-14.0</td>
+      <td>-24.0</td>
+      <td>-15.0</td>
+      <td>88.0</td>
+      <td>73.0</td>
+      <td>79.0</td>
+    </tr>
+    <tr>
+      <th>14</th>
+      <td>7</td>
+      <td>15</td>
+      <td>25.8</td>
+      <td>11.2</td>
+      <td>14.6</td>
+      <td>8</td>
+      <td>19.2</td>
+      <td>フォルテース</td>
+      <td>牡4</td>
+      <td>58.0</td>
+      <td>長岡禎仁</td>
+      <td>逃</td>
+      <td>89.0</td>
+      <td>79.0</td>
+      <td>89</td>
+      <td>3.0</td>
+      <td>-14.0</td>
+      <td>-16.0</td>
+      <td>89.0</td>
+      <td>70.0</td>
+      <td>66.0</td>
+    </tr>
+    <tr>
+      <th>15</th>
+      <td>8</td>
+      <td>16</td>
+      <td>58.7</td>
+      <td>26.9</td>
+      <td>31.8</td>
+      <td>1</td>
+      <td>2.2</td>
+      <td>ジャスパーノワール</td>
+      <td>牡3</td>
+      <td>56.0</td>
+      <td>団野大成</td>
+      <td>逃</td>
+      <td>95.0</td>
+      <td>85.0</td>
+      <td>85</td>
+      <td>9.0</td>
+      <td>-9.0</td>
+      <td>-11.0</td>
+      <td>101.0</td>
+      <td>91.0</td>
+      <td>96.0</td>
+    </tr>
+    <tr>
+      <th>16</th>
+      <td>8</td>
+      <td>17</td>
+      <td>14.4</td>
+      <td>8.0</td>
+      <td>6.4</td>
+      <td>4</td>
+      <td>9.9</td>
+      <td>キングクー</td>
+      <td>牡5</td>
+      <td>58.0</td>
+      <td>藤田菜七子</td>
+      <td>先</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>59</td>
+      <td>-15.0</td>
+      <td>-25.0</td>
+      <td>-17.0</td>
+      <td>85.0</td>
+      <td>80.0</td>
+      <td>82.0</td>
+    </tr>
+    <tr>
+      <th>17</th>
+      <td>8</td>
+      <td>18</td>
+      <td>13.4</td>
+      <td>6.3</td>
+      <td>7.1</td>
+      <td>6</td>
+      <td>13.0</td>
+      <td>バスドラムガール</td>
+      <td>牝4</td>
+      <td>56.0</td>
+      <td>藤懸貴志</td>
+      <td>先</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>79</td>
+      <td>-13.0</td>
+      <td>-23.0</td>
+      <td>-33.0</td>
+      <td>78.0</td>
+      <td>70.0</td>
+      <td>62.0</td>
+    </tr>
+  </tbody>
+</table><br><br>
+            <div class="race-info">
+                <head><span class="large-font">
+                札幌11R 0:00発走 ダート1700m G3 <br>
+                </span></head>
+                Point : 14<br>
+                AI ver5.3 + ver5.5<br>
+                ◎:2(7人気) 〇:9(5人気)  ▲:12(10人気)  △I:4(2人気)  △II:7(3人気)<br>
+                AI ver5.5<br>
+                ◎:9(5人気) 〇:2(7人気)  ▲:4(2人気)  △I:12(10人気)  △II:1(8人気)<br>
+            </div>
+            <table border="1" class="dataframe my-table">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>枠</th>
+      <th>馬番</th>
+      <th>AI Score</th>
+      <th>AI (v5.3)</th>
+      <th>AI (v5.5)</th>
+      <th>人 気</th>
+      <th>単勝 オッズ</th>
+      <th>馬名</th>
+      <th>性齢</th>
+      <th>斤量</th>
+      <th>騎手</th>
+      <th>脚質</th>
+      <th>最 高</th>
+      <th>平均</th>
+      <th>前走</th>
+      <th>上り指MAX</th>
+      <th>上り指AVG</th>
+      <th>上り指1R</th>
+      <th>スピ指MAX</th>
+      <th>スピ指AVG</th>
+      <th>スピ指1R</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>1</td>
+      <td>1</td>
+      <td>92.1</td>
+      <td>41.6</td>
+      <td>50.5</td>
+      <td>8</td>
+      <td>22.0</td>
+      <td>フルム</td>
+      <td>牡5</td>
+      <td>57.0</td>
+      <td>水口優也</td>
+      <td>差</td>
+      <td>107.0</td>
+      <td>102.0</td>
+      <td>100.0</td>
+      <td>11.0</td>
+      <td>4.0</td>
+      <td>2.0</td>
+      <td>114.0</td>
+      <td>104.0</td>
+      <td>114.0</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2</td>
+      <td>2</td>
+      <td>117.3</td>
+      <td>59.7</td>
+      <td>57.6</td>
+      <td>7</td>
+      <td>17.8</td>
+      <td>ユティタム</td>
+      <td>牡4</td>
+      <td>57.0</td>
+      <td>佐々木大輔</td>
+      <td>先</td>
+      <td>106.0</td>
+      <td>99.0</td>
+      <td>96.0</td>
+      <td>18.0</td>
+      <td>6.0</td>
+      <td>8.0</td>
+      <td>113.0</td>
+      <td>101.0</td>
+      <td>96.0</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>3</td>
+      <td>3</td>
+      <td>44.3</td>
+      <td>19.5</td>
+      <td>24.8</td>
+      <td>11</td>
+      <td>43.3</td>
+      <td>ヴィクティファルス</td>
+      <td>セ6</td>
+      <td>58.0</td>
+      <td>池添謙一</td>
+      <td>差</td>
+      <td>106.0</td>
+      <td>94.0</td>
+      <td>86.0</td>
+      <td>12.0</td>
+      <td>-4.0</td>
+      <td>-13.0</td>
+      <td>100.0</td>
+      <td>89.0</td>
+      <td>77.0</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>3</td>
+      <td>4</td>
+      <td>97.7</td>
+      <td>43.2</td>
+      <td>54.5</td>
+      <td>2</td>
+      <td>4.9</td>
+      <td>ナチュラルハイ</td>
+      <td>牡4</td>
+      <td>57.0</td>
+      <td>永野猛蔵</td>
+      <td>差</td>
+      <td>107.0</td>
+      <td>103.0</td>
+      <td>107.0</td>
+      <td>9.0</td>
+      <td>3.0</td>
+      <td>4.0</td>
+      <td>122.0</td>
+      <td>102.0</td>
+      <td>122.0</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>4</td>
+      <td>5</td>
+      <td>26.0</td>
+      <td>9.7</td>
+      <td>16.3</td>
+      <td>13</td>
+      <td>86.2</td>
+      <td>ホウオウアマゾン</td>
+      <td>牡6</td>
+      <td>57.0</td>
+      <td>菱田裕二</td>
+      <td>先</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>98.0</td>
+      <td>14.0</td>
+      <td>9.0</td>
+      <td>14.0</td>
+      <td>116.0</td>
+      <td>104.0</td>
+      <td>116.0</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>4</td>
+      <td>6</td>
+      <td>67.3</td>
+      <td>24.6</td>
+      <td>42.7</td>
+      <td>6</td>
+      <td>11.2</td>
+      <td>サヴァ</td>
+      <td>牡6</td>
+      <td>57.0</td>
+      <td>岩田康誠</td>
+      <td>先</td>
+      <td>105.0</td>
+      <td>101.0</td>
+      <td>105.0</td>
+      <td>18.0</td>
+      <td>8.0</td>
+      <td>2.0</td>
+      <td>118.0</td>
+      <td>101.0</td>
+      <td>118.0</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>5</td>
+      <td>7</td>
+      <td>96.4</td>
+      <td>46.4</td>
+      <td>50.0</td>
+      <td>3</td>
+      <td>5.1</td>
+      <td>ミトノオー</td>
+      <td>牡4</td>
+      <td>58.0</td>
+      <td>松山弘平</td>
+      <td>逃</td>
+      <td>115.0</td>
+      <td>96.0</td>
+      <td>110.0</td>
+      <td>7.0</td>
+      <td>-6.0</td>
+      <td>7.0</td>
+      <td>116.0</td>
+      <td>92.0</td>
+      <td>102.0</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>5</td>
+      <td>8</td>
+      <td>56.4</td>
+      <td>19.4</td>
+      <td>37.0</td>
+      <td>12</td>
+      <td>54.4</td>
+      <td>シルトプレ</td>
+      <td>牡5</td>
+      <td>57.0</td>
+      <td>石川倭</td>
+      <td>先</td>
+      <td>109.0</td>
+      <td>95.0</td>
+      <td>90.0</td>
+      <td>10.0</td>
+      <td>2.0</td>
+      <td>10.0</td>
+      <td>88.0</td>
+      <td>85.0</td>
+      <td>88.0</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>6</td>
+      <td>9</td>
+      <td>108.6</td>
+      <td>49.0</td>
+      <td>59.6</td>
+      <td>5</td>
+      <td>9.8</td>
+      <td>ペイシャエス</td>
+      <td>牡5</td>
+      <td>58.0</td>
+      <td>横山和生</td>
+      <td>先</td>
+      <td>113.0</td>
+      <td>104.0</td>
+      <td>110.0</td>
+      <td>7.0</td>
+      <td>4.0</td>
+      <td>5.0</td>
+      <td>119.0</td>
+      <td>106.0</td>
+      <td>113.0</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>6</td>
+      <td>10</td>
+      <td>86.6</td>
+      <td>39.2</td>
+      <td>47.4</td>
+      <td>1</td>
+      <td>3.4</td>
+      <td>ドゥラエレーデ</td>
+      <td>牡4</td>
+      <td>57.0</td>
+      <td>武豊</td>
+      <td>先</td>
+      <td>115.0</td>
+      <td>108.0</td>
+      <td>NaN</td>
+      <td>10.0</td>
+      <td>1.0</td>
+      <td>-14.0</td>
+      <td>111.0</td>
+      <td>105.0</td>
+      <td>107.0</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>7</td>
+      <td>11</td>
+      <td>59.5</td>
+      <td>21.2</td>
+      <td>38.3</td>
+      <td>14</td>
+      <td>156.5</td>
+      <td>タガノクリステル</td>
+      <td>牝5</td>
+      <td>55.0</td>
+      <td>古川吉洋</td>
+      <td>先</td>
+      <td>107.0</td>
+      <td>100.0</td>
+      <td>96.0</td>
+      <td>7.0</td>
+      <td>-2.0</td>
+      <td>-4.0</td>
+      <td>105.0</td>
+      <td>94.0</td>
+      <td>104.0</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>7</td>
+      <td>12</td>
+      <td>100.3</td>
+      <td>49.4</td>
+      <td>50.9</td>
+      <td>10</td>
+      <td>26.0</td>
+      <td>テーオードレフォン</td>
+      <td>牡5</td>
+      <td>57.0</td>
+      <td>丸山元気</td>
+      <td>先</td>
+      <td>105.0</td>
+      <td>102.0</td>
+      <td>104.0</td>
+      <td>18.0</td>
+      <td>0.0</td>
+      <td>-1.0</td>
+      <td>120.0</td>
+      <td>106.0</td>
+      <td>120.0</td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>8</td>
+      <td>13</td>
+      <td>68.3</td>
+      <td>28.4</td>
+      <td>39.9</td>
+      <td>9</td>
+      <td>23.9</td>
+      <td>ベルダーイメル</td>
+      <td>牡7</td>
+      <td>57.0</td>
+      <td>富田暁</td>
+      <td>先</td>
+      <td>109.0</td>
+      <td>102.0</td>
+      <td>100.0</td>
+      <td>12.0</td>
+      <td>7.0</td>
+      <td>0.0</td>
+      <td>118.0</td>
+      <td>107.0</td>
+      <td>118.0</td>
+    </tr>
+    <tr>
+      <th>13</th>
+      <td>8</td>
+      <td>14</td>
+      <td>61.2</td>
+      <td>33.7</td>
+      <td>27.5</td>
+      <td>4</td>
+      <td>7.4</td>
+      <td>プロミストウォリア</td>
+      <td>牡7</td>
+      <td>58.0</td>
+      <td>西村淳也</td>
+      <td>逃</td>
+      <td>NaN</td>
+      <td>108.0</td>
+      <td>106.0</td>
+      <td>14.0</td>
+      <td>2.0</td>
+      <td>-1.0</td>
+      <td>109.0</td>
+      <td>101.0</td>
+      <td>109.0</td>
+    </tr>
+  </tbody>
+</table><br><br>
+            <div class="race-info">
+                <head><span class="large-font">
+                新潟07R 0:00発走 ダート1800m G3 <br>
+                </span></head>
+                Point : 8<br>
+                AI ver5.3 + ver5.5<br>
+                ◎:1(1人気) 〇:8(2人気)  ▲:12(4人気)  △I:11(5人気)  △II:4(3人気)<br>
+                AI ver5.5<br>
+                ◎:1(1人気) 〇:8(2人気)  ▲:11(5人気)  △I:12(4人気)  △II:6(8人気)<br>
+            </div>
+            <table border="1" class="dataframe my-table">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>枠</th>
+      <th>馬番</th>
+      <th>AI Score</th>
+      <th>AI (v5.3)</th>
+      <th>AI (v5.5)</th>
+      <th>人 気</th>
+      <th>単勝 オッズ</th>
+      <th>馬名</th>
+      <th>性齢</th>
+      <th>斤量</th>
+      <th>騎手</th>
+      <th>脚質</th>
+      <th>最 高</th>
+      <th>平均</th>
+      <th>前走</th>
+      <th>上り指MAX</th>
+      <th>上り指AVG</th>
+      <th>上り指1R</th>
+      <th>スピ指MAX</th>
+      <th>スピ指AVG</th>
+      <th>スピ指1R</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>1</td>
+      <td>1</td>
+      <td>112.0</td>
+      <td>54.4</td>
+      <td>57.6</td>
+      <td>1</td>
+      <td>2.2</td>
+      <td>ミッキーファイト</td>
+      <td>牡3</td>
+      <td>57.0</td>
+      <td>戸崎圭太</td>
+      <td>先</td>
+      <td>101</td>
+      <td>92</td>
+      <td>100.0</td>
+      <td>5.0</td>
+      <td>-1.0</td>
+      <td>-6.0</td>
+      <td>99.0</td>
+      <td>85.0</td>
+      <td>86.0</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2</td>
+      <td>2</td>
+      <td>62.3</td>
+      <td>20.6</td>
+      <td>41.7</td>
+      <td>14</td>
+      <td>136.6</td>
+      <td>ハーバーライト</td>
+      <td>牡3</td>
+      <td>57.0</td>
+      <td>小沢大仁</td>
+      <td>差</td>
+      <td>99</td>
+      <td>87</td>
+      <td>91.0</td>
+      <td>12.0</td>
+      <td>-0.0</td>
+      <td>-13.0</td>
+      <td>87.0</td>
+      <td>71.0</td>
+      <td>76.0</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>2</td>
+      <td>3</td>
+      <td>30.4</td>
+      <td>8.6</td>
+      <td>21.8</td>
+      <td>15</td>
+      <td>232.7</td>
+      <td>ノットイナフ</td>
+      <td>牡3</td>
+      <td>57.0</td>
+      <td>幸英明</td>
+      <td>差</td>
+      <td>90</td>
+      <td>85</td>
+      <td>81.0</td>
+      <td>1.0</td>
+      <td>-8.0</td>
+      <td>-13.0</td>
+      <td>82.0</td>
+      <td>75.0</td>
+      <td>72.0</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>3</td>
+      <td>4</td>
+      <td>85.4</td>
+      <td>42.7</td>
+      <td>42.7</td>
+      <td>3</td>
+      <td>8.2</td>
+      <td>ジーサイクロン</td>
+      <td>牡3</td>
+      <td>57.0</td>
+      <td>Ｍ．デムーロ</td>
+      <td>差</td>
+      <td>97</td>
+      <td>81</td>
+      <td>97.0</td>
+      <td>12.0</td>
+      <td>-0.0</td>
+      <td>11.0</td>
+      <td>89.0</td>
+      <td>72.0</td>
+      <td>81.0</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>3</td>
+      <td>5</td>
+      <td>51.1</td>
+      <td>13.6</td>
+      <td>37.5</td>
+      <td>12</td>
+      <td>59.2</td>
+      <td>ピュアキアン</td>
+      <td>牡3</td>
+      <td>57.0</td>
+      <td>吉田豊</td>
+      <td>逃</td>
+      <td>95</td>
+      <td>88</td>
+      <td>86.0</td>
+      <td>2.0</td>
+      <td>-10.0</td>
+      <td>-21.0</td>
+      <td>94.0</td>
+      <td>81.0</td>
+      <td>71.0</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>4</td>
+      <td>6</td>
+      <td>82.5</td>
+      <td>39.2</td>
+      <td>43.3</td>
+      <td>8</td>
+      <td>24.3</td>
+      <td>ハビレ</td>
+      <td>牡3</td>
+      <td>57.0</td>
+      <td>三浦皇成</td>
+      <td>差</td>
+      <td>103</td>
+      <td>91</td>
+      <td>91.0</td>
+      <td>3.0</td>
+      <td>-3.0</td>
+      <td>3.0</td>
+      <td>105.0</td>
+      <td>90.0</td>
+      <td>99.0</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>4</td>
+      <td>7</td>
+      <td>67.4</td>
+      <td>29.2</td>
+      <td>38.2</td>
+      <td>10</td>
+      <td>48.8</td>
+      <td>バロンドール</td>
+      <td>牡3</td>
+      <td>57.0</td>
+      <td>横山典弘</td>
+      <td>先</td>
+      <td>97</td>
+      <td>89</td>
+      <td>NaN</td>
+      <td>11.0</td>
+      <td>-2.0</td>
+      <td>-4.0</td>
+      <td>99.0</td>
+      <td>78.0</td>
+      <td>99.0</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>5</td>
+      <td>8</td>
+      <td>98.3</td>
+      <td>45.6</td>
+      <td>52.7</td>
+      <td>2</td>
+      <td>4.9</td>
+      <td>ソニックスター</td>
+      <td>牡3</td>
+      <td>57.0</td>
+      <td>川田将雅</td>
+      <td>差</td>
+      <td>102</td>
+      <td>86</td>
+      <td>101.0</td>
+      <td>5.0</td>
+      <td>-4.0</td>
+      <td>-3.0</td>
+      <td>111.0</td>
+      <td>87.0</td>
+      <td>111.0</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>5</td>
+      <td>9</td>
+      <td>83.4</td>
+      <td>40.1</td>
+      <td>43.3</td>
+      <td>6</td>
+      <td>15.3</td>
+      <td>ミッキークレスト</td>
+      <td>牡3</td>
+      <td>57.0</td>
+      <td>坂井瑠星</td>
+      <td>先</td>
+      <td>99</td>
+      <td>88</td>
+      <td>91.0</td>
+      <td>-0.0</td>
+      <td>-3.0</td>
+      <td>-2.0</td>
+      <td>88.0</td>
+      <td>79.0</td>
+      <td>80.0</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>6</td>
+      <td>10</td>
+      <td>65.5</td>
+      <td>29.4</td>
+      <td>36.1</td>
+      <td>13</td>
+      <td>71.0</td>
+      <td>メイショウフウドウ</td>
+      <td>牡3</td>
+      <td>57.0</td>
+      <td>西塚洸二</td>
+      <td>先</td>
+      <td>96</td>
+      <td>75</td>
+      <td>96.0</td>
+      <td>4.0</td>
+      <td>-9.0</td>
+      <td>3.0</td>
+      <td>89.0</td>
+      <td>72.0</td>
+      <td>89.0</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>6</td>
+      <td>11</td>
+      <td>86.0</td>
+      <td>36.4</td>
+      <td>49.6</td>
+      <td>5</td>
+      <td>11.3</td>
+      <td>ブルーサン</td>
+      <td>牡3</td>
+      <td>57.0</td>
+      <td>石橋脩</td>
+      <td>逃</td>
+      <td>104</td>
+      <td>89</td>
+      <td>92.0</td>
+      <td>6.0</td>
+      <td>-10.0</td>
+      <td>-20.0</td>
+      <td>101.0</td>
+      <td>88.0</td>
+      <td>101.0</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>7</td>
+      <td>12</td>
+      <td>88.0</td>
+      <td>44.4</td>
+      <td>43.6</td>
+      <td>4</td>
+      <td>8.4</td>
+      <td>サンライズソレイユ</td>
+      <td>牡3</td>
+      <td>57.0</td>
+      <td>Ｃ．ルメール</td>
+      <td>差</td>
+      <td>99</td>
+      <td>93</td>
+      <td>90.0</td>
+      <td>20.0</td>
+      <td>5.0</td>
+      <td>7.0</td>
+      <td>97.0</td>
+      <td>87.0</td>
+      <td>97.0</td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>7</td>
+      <td>13</td>
+      <td>81.5</td>
+      <td>42.2</td>
+      <td>39.3</td>
+      <td>7</td>
+      <td>22.0</td>
+      <td>ロジアデレード</td>
+      <td>牡3</td>
+      <td>57.0</td>
+      <td>内田博幸</td>
+      <td>先</td>
+      <td>101</td>
+      <td>93</td>
+      <td>93.0</td>
+      <td>0.0</td>
+      <td>-3.0</td>
+      <td>0.0</td>
+      <td>103.0</td>
+      <td>86.0</td>
+      <td>81.0</td>
+    </tr>
+    <tr>
+      <th>13</th>
+      <td>8</td>
+      <td>14</td>
+      <td>50.1</td>
+      <td>21.3</td>
+      <td>28.8</td>
+      <td>11</td>
+      <td>52.9</td>
+      <td>サトノフェニックス</td>
+      <td>牡3</td>
+      <td>57.0</td>
+      <td>和田竜二</td>
+      <td>先</td>
+      <td>84</td>
+      <td>80</td>
+      <td>NaN</td>
+      <td>-5.0</td>
+      <td>-10.0</td>
+      <td>-16.0</td>
+      <td>75.0</td>
+      <td>74.0</td>
+      <td>74.0</td>
+    </tr>
+    <tr>
+      <th>14</th>
+      <td>8</td>
+      <td>15</td>
+      <td>54.2</td>
+      <td>19.1</td>
+      <td>35.1</td>
+      <td>9</td>
+      <td>26.1</td>
+      <td>アラレタバシル</td>
+      <td>牡3</td>
+      <td>57.0</td>
+      <td>野中悠太郎</td>
+      <td>差</td>
+      <td>93</td>
+      <td>84</td>
+      <td>93.0</td>
+      <td>9.0</td>
+      <td>-2.0</td>
+      <td>-7.0</td>
+      <td>87.0</td>
+      <td>76.0</td>
+      <td>78.0</td>
+    </tr>
+  </tbody>
+</table><br><br>
