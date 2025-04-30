@@ -26,3 +26,6 @@ class LocalPaths:
     ### masterディレクトリのパス
     MASTER_DIR: str = os.path.join(DATA_DIR, 'master')
     MASTER_RAW_HORSE_RESULTS_PATH: str = os.path.join(MASTER_DIR, 'horse_results_updated_at.csv')
+    
+    ### pickle一時保存用のPath
+    PICKLE_DIR:str = BASE_DIR + '/tmp_pickle/'
