@@ -139,7 +139,7 @@ def output_score(race_day_list):
                 
 def calc_score(day, race_id_list, keiba_ai, keiba_ai2, keiba_ai3, keiba_ai4):
 
-    filepath = LocalPaths.BASE_DIR + 'data/tmp/shutuba.pickle'
+    filepath = LocalPaths.BASE_DIR + '/data/tmp/shutuba.pickle'
     today = today = day[0:4]+'/'+day[4:6]+'/'+day[6:8]
         
 

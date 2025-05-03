@@ -3,6 +3,8 @@ import os
 import dill
 from ._keiba_ai import KeibaAI
 from ._data_splitter import DataSplitter
+from modules.constants import LocalPaths
+
 
 
 class KeibaAIFactory:
@@ -22,8 +24,8 @@ class KeibaAIFactory:
         """
         yyyymmdd = datetime.date.today().strftime('%Y%m%d')
         # ディレクトリ作成
-        os.makedirs(os.path.join('models', yyyymmdd), exist_ok=True)
-        filepath_pickle = os.path.join('models', yyyymmdd, '{}.pickle'.format(version_name))
+        os.makedirs(os.path.join('/mnt/h/AIData/JRA/models', yyyymmdd), exist_ok=True)
+        filepath_pickle = os.path.join('/mnt/h/AIData/JRA/models', yyyymmdd, '{}.pickle'.format(version_name))
         with open(filepath_pickle, mode='wb') as f:
             dill.dump(keibaAI, f)
     

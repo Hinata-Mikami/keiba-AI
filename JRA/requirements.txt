@@ -12,3 +12,4 @@ optuna
 jupyterlab
 ipywidgets
 webdriver-manager
+lxml

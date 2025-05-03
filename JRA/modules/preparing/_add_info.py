@@ -296,7 +296,7 @@ def scrape_horse_premium(horse_id, skip=False, max_retries=10) -> pd.DataFrame:
     Returns:
         馬のデータフレーム
     """
-    filename = LocalPaths.BASE_DIR + f'./data/html/horse_premium/{horse_id}.html'
+    filename = LocalPaths.BASE_DIR + f'/data/html/horse_premium/{horse_id}.html'
 
     # ファイルが既に存在する場合
     if skip and os.path.isfile(filename):
@@ -372,7 +372,7 @@ def get_race_result(race_id, skip=False) -> pd.DataFrame:
     """
     """
     
-    filename = LocalPaths.BASE_DIR + os.path.join("data/html/race_premium/", race_id+'.bin')
+    filename = LocalPaths.BASE_DIR + os.path.join("/data/html/race_premium/", race_id+'.bin')
 
     # skipがTrueで、かつbinファイルがすでに存在する場合は飛ばす
     if skip and os.path.isfile(filename):

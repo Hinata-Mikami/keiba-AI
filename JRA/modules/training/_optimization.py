@@ -13,7 +13,7 @@ from sklearn.model_selection import StratifiedKFold, cross_val_score
 # ログの設定
 logging.basicConfig(filename="optuna_log.txt", level=logging.INFO, format="%(asctime)s - %(message)s")
 
-def optimization(data, n_trials=200):
+def optimization(data, n_trials=1000):
     # 説明変数と目的変数を分離
     X = data.drop(columns=['rank', 'date'])  # 'rank' を削除
     y = data['rank']  # 目的変数

@@ -67,7 +67,7 @@ def extract_index_info(html: str, race_id: str) -> pd.DataFrame:
         df["馬番"] = range(1, len(df) + 1)
     return df
 
-def scrape_zenso(race_id_list: list, dirpath : str = LocalPaths.BASE_DIR + 'data/shisu_html', extension: str = '.html') -> pd.DataFrame:
+def scrape_zenso(race_id_list: list, dirpath : str = LocalPaths.BASE_DIR + '/data/shisu_html', extension: str = '.html') -> pd.DataFrame:
     df_list = []
     
     for race_id in tqdm(race_id_list):
