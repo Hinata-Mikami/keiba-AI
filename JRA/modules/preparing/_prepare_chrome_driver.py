@@ -10,14 +10,14 @@ def prepare_chrome_driver():
     """
     # ヘッドレスモード（ブラウザが立ち上がらない）
     options = Options()
-    options.add_argument('--headless')
+    options.add_argument('--headless=new')
     options.add_argument("--no-sandbox")
     options.add_argument("--window-position=-2400,-2400")
     # Selenium3の場合
     #driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
     # Selenium4の場合
-    # driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
-    driver = webdriver.Chrome(options=options)
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+    # driver = webdriver.Chrome(options=options)
     # 画面サイズをなるべく小さくし、余計な画像などを読み込まないようにする
     driver.set_window_size(50, 50)
     return driver

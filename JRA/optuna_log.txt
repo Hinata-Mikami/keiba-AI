@@ -1102,3 +1102,22 @@
 2025-05-03 12:13:31,061 - Trial 997: AUC=0.7650221615224063, Features=101
 2025-05-03 12:14:07,109 - Trial 998: AUC=0.7645850705303278, Features=101
 2025-05-03 12:14:44,190 - Trial 999: AUC=0.7648159766627254, Features=100
+2025-05-07 22:46:43,796 - ====== WebDriver manager ======
+2025-05-07 22:46:44,577 - Get LATEST chromedriver version for google-chrome
+2025-05-07 22:46:44,903 - Get LATEST chromedriver version for google-chrome
+2025-05-07 22:46:44,965 - There is no [linux64] chromedriver "136.0.7103.92" for browser google-chrome "136.0.7103" in cache
+2025-05-07 22:46:44,966 - Get LATEST chromedriver version for google-chrome
+2025-05-07 22:46:45,165 - WebDriver version 136.0.7103.92 selected
+2025-05-07 22:46:45,178 - Modern chrome version https://storage.googleapis.com/chrome-for-testing-public/136.0.7103.92/linux64/chromedriver-linux64.zip
+2025-05-07 22:46:45,178 - About to download new driver from https://storage.googleapis.com/chrome-for-testing-public/136.0.7103.92/linux64/chromedriver-linux64.zip
+2025-05-07 22:46:45,268 - Driver downloading response is 200
+2025-05-07 22:46:46,419 - Get LATEST chromedriver version for google-chrome
+2025-05-07 22:46:47,047 - Driver has been saved in cache [/home/mikam/.wdm/drivers/chromedriver/linux64/136.0.7103.92]
+2025-05-07 23:01:05,844 - ====== WebDriver manager ======
+2025-05-07 23:01:06,159 - Get LATEST chromedriver version for google-chrome
+2025-05-07 23:01:06,217 - Get LATEST chromedriver version for google-chrome
+2025-05-07 23:01:06,386 - Driver [/home/mikam/.wdm/drivers/chromedriver/linux64/136.0.7103.92/chromedriver-linux64/chromedriver] found in cache
+2025-05-07 23:02:17,024 - ====== WebDriver manager ======
+2025-05-07 23:02:17,258 - Get LATEST chromedriver version for google-chrome
+2025-05-07 23:02:18,362 - Get LATEST chromedriver version for google-chrome
+2025-05-07 23:02:18,623 - Driver [/home/mikam/.wdm/drivers/chromedriver/linux64/136.0.7103.92/chromedriver-linux64/chromedriver] found in cache

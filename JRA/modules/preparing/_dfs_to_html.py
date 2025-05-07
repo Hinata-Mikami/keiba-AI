@@ -211,8 +211,6 @@ def dfs_to_html(date, ids, keiba_ai, keiba_ai2, keiba_ai3, keiba_ai4):
         race_time_list = ['0:00'] * len(ids)
     
     for race_id, race_time in zip(race_id_list, race_time_list):
-        # df0 = preparing.scrape_race_info(race_id)
-        # print(df0)
         with redirect_stdout(open(os.devnull, 'w')):
             (df, loc, R, df_tmp, nisai, hinba) = preparing.calc_score(date, [race_id], keiba_ai, keiba_ai2, keiba_ai3, keiba_ai4)
         # print(df)
