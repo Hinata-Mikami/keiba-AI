@@ -7,9 +7,9 @@ class LocalPaths:
     # パス
     ## プロジェクトルートの絶対パス
     if platform.system() == 'Windows':
-        BASE_DIR: str = os.path.abspath('H:/AIData/JRA/')
+        BASE_DIR: str = os.path.abspath('E:/AIData/JRA/')
     else:
-        BASE_DIR: str = os.path.abspath('/mnt/h/AIData/JRA/')
+        BASE_DIR: str = os.path.abspath('/mnt/e/AIData/JRA/')
     ## dataディレクトリまでの絶対パス
     DATA_DIR: str = os.path.join(BASE_DIR, 'data')
     ### HTMLディレクトリのパス

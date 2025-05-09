@@ -13,3 +13,4 @@ jupyterlab
 ipywidgets
 webdriver-manager
 lxml
+optuna-integration[lightgbm]
