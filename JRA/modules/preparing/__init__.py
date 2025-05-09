@@ -17,4 +17,4 @@ from ._output_score import output_score, calc_score
 from ._scrape_chokyo import chokyo_df
 from ._waku import waku
 from ._dfs_to_html import dfs_to_html, dfs_to_html_for_test
-from ._add_info import analyze_race_files, check_info, scrape_info_of_start, scrape_info_of_start_1race, get_race_result, scrape_L3F_time, add_L3F_features
+from ._add_info import analyze_race_files, check_info, scrape_info_of_start, scrape_info_of_start_1race, get_race_result, scrape_L3F_time, add_L3F_features, add_L3F_features_2

@@ -515,3 +515,14 @@ def add_L3F_features(df):
     
     return df
 
+def add_L3F_features_2(df):
+    # L3Fの全体平均
+    L3F_avg = df['L3F'].mean()
+    # L3Fの上位3つの平均
+    L3F_min3 = df.nsmallest(3, 'L3F')['L3F'].mean()
+
+    # 全行に対して同じ値を代入
+    df['L3F_avg'] = L3F_avg
+    df['L3F_min3'] = L3F_min3
+
+    return df

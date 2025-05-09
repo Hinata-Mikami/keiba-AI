@@ -1121,3 +1121,52 @@
 2025-05-07 23:02:17,258 - Get LATEST chromedriver version for google-chrome
 2025-05-07 23:02:18,362 - Get LATEST chromedriver version for google-chrome
 2025-05-07 23:02:18,623 - Driver [/home/mikam/.wdm/drivers/chromedriver/linux64/136.0.7103.92/chromedriver-linux64/chromedriver] found in cache
+2025-05-09 18:03:00,333 - ====== WebDriver manager ======
+2025-05-09 18:03:00,808 - Get LATEST chromedriver version for google-chrome
+2025-05-09 18:03:00,882 - Get LATEST chromedriver version for google-chrome
+2025-05-09 18:03:00,938 - Get LATEST chromedriver version for google-chrome
+2025-05-09 18:03:01,062 - WebDriver version 136.0.7103.92 selected
+2025-05-09 18:03:01,066 - Modern chrome version https://storage.googleapis.com/chrome-for-testing-public/136.0.7103.92/linux64/chromedriver-linux64.zip
+2025-05-09 18:03:01,066 - About to download new driver from https://storage.googleapis.com/chrome-for-testing-public/136.0.7103.92/linux64/chromedriver-linux64.zip
+2025-05-09 18:03:01,149 - Driver downloading response is 200
+2025-05-09 18:03:01,997 - Get LATEST chromedriver version for google-chrome
+2025-05-09 18:03:02,184 - Driver has been saved in cache [/home/mikam/.wdm/drivers/chromedriver/linux64/136.0.7103.92]
+2025-05-09 18:57:59,780 - ====== WebDriver manager ======
+2025-05-09 18:58:00,410 - Get LATEST chromedriver version for google-chrome
+2025-05-09 18:58:00,848 - Get LATEST chromedriver version for google-chrome
+2025-05-09 18:58:00,917 - Driver [/home/mikam/.wdm/drivers/chromedriver/linux64/136.0.7103.92/chromedriver-linux64/chromedriver] found in cache
+2025-05-09 19:05:13,888 - ====== WebDriver manager ======
+2025-05-09 19:05:14,454 - Get LATEST chromedriver version for google-chrome
+2025-05-09 19:05:14,959 - Get LATEST chromedriver version for google-chrome
+2025-05-09 19:05:15,143 - Driver [/home/mikam/.wdm/drivers/chromedriver/linux64/136.0.7103.92/chromedriver-linux64/chromedriver] found in cache
+2025-05-09 19:08:50,539 - ====== WebDriver manager ======
+2025-05-09 19:08:51,429 - Get LATEST chromedriver version for google-chrome
+2025-05-09 19:08:51,934 - Get LATEST chromedriver version for google-chrome
+2025-05-09 19:08:52,016 - Driver [/home/mikam/.wdm/drivers/chromedriver/linux64/136.0.7103.92/chromedriver-linux64/chromedriver] found in cache
+2025-05-09 19:10:28,632 - Retrying (Retry(total=2, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7f9a602d4100>: Failed to establish a new connection: [Errno 111] Connection refused')': /session/f7ccf39dbb023169b158d44a01536460/window
+2025-05-09 19:10:28,634 - Retrying (Retry(total=1, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7f9a602d41c0>: Failed to establish a new connection: [Errno 111] Connection refused')': /session/f7ccf39dbb023169b158d44a01536460/window
+2025-05-09 19:10:28,634 - Retrying (Retry(total=0, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7f9a602d4310>: Failed to establish a new connection: [Errno 111] Connection refused')': /session/f7ccf39dbb023169b158d44a01536460/window
+2025-05-09 19:11:46,443 - ====== WebDriver manager ======
+2025-05-09 19:11:46,833 - Get LATEST chromedriver version for google-chrome
+2025-05-09 19:11:46,943 - Get LATEST chromedriver version for google-chrome
+2025-05-09 19:11:46,992 - Driver [/home/mikam/.wdm/drivers/chromedriver/linux64/136.0.7103.92/chromedriver-linux64/chromedriver] found in cache
+2025-05-09 19:15:45,588 - ====== WebDriver manager ======
+2025-05-09 19:15:46,269 - Get LATEST chromedriver version for google-chrome
+2025-05-09 19:15:46,772 - Get LATEST chromedriver version for google-chrome
+2025-05-09 19:15:46,859 - Driver [/home/mikam/.wdm/drivers/chromedriver/linux64/136.0.7103.92/chromedriver-linux64/chromedriver] found in cache
+2025-05-09 19:18:46,562 - ====== WebDriver manager ======
+2025-05-09 19:18:46,933 - Get LATEST chromedriver version for google-chrome
+2025-05-09 19:18:46,988 - Get LATEST chromedriver version for google-chrome
+2025-05-09 19:18:47,033 - Driver [/home/mikam/.wdm/drivers/chromedriver/linux64/136.0.7103.92/chromedriver-linux64/chromedriver] found in cache
+2025-05-09 19:23:41,940 - ====== WebDriver manager ======
+2025-05-09 19:23:42,424 - Get LATEST chromedriver version for google-chrome
+2025-05-09 19:23:42,873 - Get LATEST chromedriver version for google-chrome
+2025-05-09 19:23:42,946 - Driver [/home/mikam/.wdm/drivers/chromedriver/linux64/136.0.7103.92/chromedriver-linux64/chromedriver] found in cache
+2025-05-09 19:31:09,009 - ====== WebDriver manager ======
+2025-05-09 19:31:09,535 - Get LATEST chromedriver version for google-chrome
+2025-05-09 19:31:10,002 - Get LATEST chromedriver version for google-chrome
+2025-05-09 19:31:10,068 - Driver [/home/mikam/.wdm/drivers/chromedriver/linux64/136.0.7103.92/chromedriver-linux64/chromedriver] found in cache
+2025-05-09 19:35:35,299 - ====== WebDriver manager ======
+2025-05-09 19:35:35,789 - Get LATEST chromedriver version for google-chrome
+2025-05-09 19:35:36,311 - Get LATEST chromedriver version for google-chrome
+2025-05-09 19:35:36,389 - Driver [/home/mikam/.wdm/drivers/chromedriver/linux64/136.0.7103.92/chromedriver-linux64/chromedriver] found in cache

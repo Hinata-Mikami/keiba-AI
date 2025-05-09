@@ -14,9 +14,10 @@ from modules import simulation
 from modules import policies
 import os
 from contextlib import redirect_stdout
+import gc
 
 
-def dfs_to_html(date, ids, keiba_ai, keiba_ai2, keiba_ai3, keiba_ai4):
+def dfs_to_html(date, ids, keiba_ai, keiba_ai2, keiba_ai3, keiba_ai4, keiba_ai5, keiba_ai6):
     
     file_name = date + ".html"
     folder_path = "./score_html"
@@ -186,10 +187,6 @@ def dfs_to_html(date, ids, keiba_ai, keiba_ai2, keiba_ai3, keiba_ai4):
     
     
     dfs = []
-    # keiba_ai = training.KeibaAIFactory.load('models/20250327/basemodel_shisu_v11.0.pickle')
-    # keiba_ai2 = training.KeibaAIFactory.load('models/20250329/basemodel_shisu_v13.1.pickle')
-    # keiba_ai3 = training.KeibaAIFactory.load('models/20250329/basemodel_shisu_v13.0.pickle')     
-    # keiba_ai4 = training.KeibaAIFactory.load('models/20250426/basemodel_v15.0_L3F.pickle')   
     are_races = []
     points = []
     nums = []
@@ -211,19 +208,21 @@ def dfs_to_html(date, ids, keiba_ai, keiba_ai2, keiba_ai3, keiba_ai4):
         race_time_list = ['0:00'] * len(ids)
     
     for race_id, race_time in zip(race_id_list, race_time_list):
-        with redirect_stdout(open(os.devnull, 'w')):
-            (df, loc, R, df_tmp, nisai, hinba) = preparing.calc_score(date, [race_id], keiba_ai, keiba_ai2, keiba_ai3, keiba_ai4)
+        # with redirect_stdout(open(os.devnull, 'w')):
+        (df, loc, R, df_tmp, nisai, hinba) = preparing.calc_score(date, [race_id], keiba_ai, keiba_ai2, keiba_ai3, keiba_ai4, keiba_ai5, keiba_ai6)
+        gc.collect()
         # print(df)
         if R != -1:
             df0 = preparing.scrape_race_info(race_id)
 
             df = df0.merge(df, on=['馬番'], how='left')
             df.set_index('馬番')
-            df["score_x"] *= 100
+            # df["score_x"] *= 10 #1
             # df['score_x'] += 50
-            df["score_y"] *= 100
-            df["score_z"] *= 100
-            df["score_w"] *= 10
+            df["score_y"] *= 100 #2
+            df["score_z"] *= 100 #3
+            df["score_w"] *= 100 #4
+            df["score_v"] *= 100 #5
             
             # Assuming df is already defined
             # Replace NaN values with 0 (or any other integer value)
@@ -231,16 +230,19 @@ def dfs_to_html(date, ids, keiba_ai, keiba_ai2, keiba_ai3, keiba_ai4):
             df["score_y"].fillna(0, inplace=True)
             df["score_z"].fillna(0, inplace=True)
             df["score_w"].fillna(0, inplace=True)
-            pace = df["score_w"].mean().round(2)
-            df["score_x"] = df["score_x"].astype(float).round(1)
+            df["score_v"].fillna(0, inplace=True)
+            # pace = df["score_x"].mean().round(2)
+            df["score_x"] = df["score_x"].astype(float).round(2)
             df["score_y"] = df["score_y"].astype(float).round(1)
             df["score_z"] = df["score_z"].astype(float).round(1)
-            df["score_w"] = df["score_w"].astype(float).round(2)
+            df["score_w"] = df["score_w"].astype(float).round(1)
+            df["score_v"] = df["score_v"].astype(float).round(1)
             # df['AI Score'] = df["score_x"] + df["score_y"] 
-            df = df.rename(columns={'score_x': 'v11.0 実力' })
-            df = df.rename(columns={'score_y': 'v13.1 穴馬'})
-            df = df.rename(columns={'score_z': 'v13.0 穴馬'})
-            df = df.rename(columns={'score_w': 'ラスト3F'})
+            df = df.rename(columns={'score_x': 'ラスト3F' })
+            df = df.rename(columns={'score_y': 'v11.0 実力'})
+            df = df.rename(columns={'score_z': 'v11.5 実力'})
+            df = df.rename(columns={'score_w': 'v17.5 単勝'})
+            df = df.rename(columns={'score_v': 'v15.7 展開'})
             df = df.rename(columns={'５走 平均': '平均'})
             df = df.rename(columns={'斤量_x': '斤量'})
             df["馬名"] = df["馬名"].str.split().str[1]
@@ -273,26 +275,25 @@ def dfs_to_html(date, ids, keiba_ai, keiba_ai2, keiba_ai3, keiba_ai4):
             df['スピ指MAX'] = df['スピ指MAX'].round(1)
             df['スピ指AVG'] = df['スピ指AVG'].round(1)
 
-            
+            df1 = df.reindex(columns=['馬番', 'score_u', '人 気'])
             
             for i in ["1", "2", "3", "4"]:
                 for j in ["1", "2", "3", "4", "5"]:
                     df = df.drop(columns = ["通過"+i+"C_"+j+"R"], axis = 1)
             
             if '単勝 オッズ' in df.columns:
-                df = df.reindex(columns=['枠_x', '馬番', 'v11.0 実力', 'v13.1 穴馬', 'v13.0 穴馬' ,'ラスト3F',  '人 気', '単勝 オッズ',  '馬名', '性齢', '斤量', '騎手', '脚質', '最 高', '平均', '前走', '上り指MAX', '上り指AVG', '上り指1R', 'スピ指MAX', 'スピ指AVG', 'スピ指1R'])
+                df = df.reindex(columns=['枠_x', '馬番', 'ラスト3F', 'v11.0 実力', 'v11.5 実力', 'v17.5 単勝', 'v15.7 展開', '人 気', '単勝 オッズ',  '馬名', '性齢', '斤量', '騎手', '脚質', '最 高', '平均', '前走', '上り指MAX', '上り指AVG', '上り指1R', 'スピ指MAX', 'スピ指AVG', 'スピ指1R'])
 
             else:
-                df = df.reindex(columns=['枠_x', '馬番','v11.0 実力', 'v13.1 穴馬', 'v13.0 穴馬', 'ラスト3F', '人 気', '予想 オッズ',  '馬名', '性齢', '斤量', '騎手', '脚質',  '最 高', '平均', '前走', '上り指MAX', '上り指AVG', '上り指1R', 'スピ指MAX', 'スピ指AVG', 'スピ指1R'])
+                df = df.reindex(columns=['枠_x', '馬番', 'ラスト3F', 'v11.0 実力', 'v11.5 実力', 'v17.5 単勝', 'v15.7 展開', '人 気', '予想 オッズ',  '馬名', '性齢', '斤量', '騎手', '脚質',  '最 高', '平均', '前走', '上り指MAX', '上り指AVG', '上り指1R', 'スピ指MAX', 'スピ指AVG', 'スピ指1R'])
 
 
             dfs.append(df)
             
-            df1 = df
-            # df0 = df1.sort_values('v11.0 実力', ascending=False)
-            # num_11 = df0.iat[0, 1]
-            # num_12 = df0.iat[1, 1]
-            # num_13 = df0.iat[2, 1]
+            df1 = df1.sort_values('score_u', ascending=False)
+            num_11 = df0.iat[0, 0]
+            num_12 = df0.iat[1, 0]
+            num_13 = df0.iat[2, 0]
             # num_14 = df0.iat[3, 1]
             # try:
             #     num_15 = df0.iat[4, 1]
@@ -304,9 +305,9 @@ def dfs_to_html(date, ids, keiba_ai, keiba_ai2, keiba_ai3, keiba_ai4):
             # except IndexError:
             #     num_16 = 0
                 
-            # pop_11 = int(df0.iat[0, 5])
-            # pop_12 = int(df0.iat[1, 5])
-            # pop_13 = int(df0.iat[2, 5])
+            pop_11 = int(df0.iat[0, 2])
+            pop_12 = int(df0.iat[1, 2])
+            pop_13 = int(df0.iat[2, 2])
             # pop_14 = int(df0.iat[3, 5])
             # try:
             #     pop_15 = int(df0.iat[4, 5])
@@ -332,7 +333,7 @@ def dfs_to_html(date, ids, keiba_ai, keiba_ai2, keiba_ai3, keiba_ai4):
             # except IndexError:
             #     sc_16 = 0
 
-            df2 = df1.sort_values('v11.0 実力', ascending=False)
+            df2 = df.sort_values('v11.0 実力', ascending=False)
             num_51 = df2.iat[0, 1]
             num_52 = df2.iat[1, 1]
             num_53 = df2.iat[2, 1]
@@ -388,7 +389,9 @@ def dfs_to_html(date, ids, keiba_ai, keiba_ai2, keiba_ai3, keiba_ai4):
                 <head><span class="large-font">
                 {loc}{R}R {race_time}発走 {df_tmp.iat[0, 11]}{df_tmp.iat[0, 10]}m {df_tmp.iat[0, cl]} {info}<br>
                 </span></head>
-                Point : {pop_51 + pop_52 + pop_53} Pace : {pace} <br>
+                Point : {pop_51 + pop_52 + pop_53} <br>
+                穴馬モデル
+                ☆1:{num_11} ({pop_11}人気) ☆2:{num_12} ({pop_12}人気)  ☆3:{num_13} ({pop_13}人気)
             </div>
             """
             html_tables += race_info_html + df.to_html(classes='my-table') + "<br><br>"
@@ -490,8 +493,8 @@ def dfs_to_html_for_test (dates : list, file_name : str):
         
         
         for race_id in race_id_list:
-            with redirect_stdout(open(os.devnull, 'w')):
-                (df, loc, R, df_tmp, _, _) = preparing.calc_score(date, [race_id], keiba_ai, keiba_ai2)
+            # with redirect_stdout(open(os.devnull, 'w')):
+            (df, loc, R, df_tmp, _, _) = preparing.calc_score(date, [race_id], keiba_ai, keiba_ai2)
             if R != -1:
                 df0 = preparing.scrape_race_info(race_id)
                 df = df0.merge(df, on=['馬番'], how='left')

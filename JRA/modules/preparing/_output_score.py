@@ -137,7 +137,7 @@ def output_score(race_day_list):
                 print(keiba_ai.calc_score(X1, policies.BasicScorePolicy).sort_values('score', ascending=False))
                 
                 
-def calc_score(day, race_id_list, keiba_ai, keiba_ai2, keiba_ai3, keiba_ai4):
+def calc_score(day, race_id_list, keiba_ai, keiba_ai2, keiba_ai3, keiba_ai4, keiba_ai5, keiba_ai6):
 
     filepath = LocalPaths.BASE_DIR + '/data/tmp/shutuba.pickle'
     today = today = day[0:4]+'/'+day[4:6]+'/'+day[6:8]
@@ -177,10 +177,10 @@ def calc_score(day, race_id_list, keiba_ai, keiba_ai2, keiba_ai3, keiba_ai4):
             # chokyo_info = preparing.chokyo_df([race_id])
             zenso_info.index.name = 'race_id'
             speed_shisu.index.name = 'race_id'
-            add_df0 = zenso_info.merge(speed_shisu, on=['race_id', '馬番'], how='left')
-            add_df1 = time_info.merge(add_df0, on=['race_id', '馬番'], how='left')
+            add_df = zenso_info.merge(speed_shisu, on=['race_id', '馬番'], how='left')
+            add_df = time_info.merge(add_df, on=['race_id', '馬番'], how='left')
             # add_df = chokyo_info.merge(add_df1, on=['race_id', '馬番'], how='left')
-            add_df = preparing.analyze_race_files(add_df1, True)
+            add_df = preparing.analyze_race_files(add_df, True)
                     
             # 出馬表の加工
             shutuba_table_processor = preprocessing.ShutubaTableProcessor(filepath)
@@ -213,45 +213,58 @@ def calc_score(day, race_id_list, keiba_ai, keiba_ai2, keiba_ai3, keiba_ai4):
             # 指数系をさらにマージ
             feature_enginnering_shutuba.featured_data.index.name = 'race_id'
             add_df = add_df.set_index('race_id')
-            d = feature_enginnering_shutuba.featured_data.merge(add_df, on=['race_id', '馬番'], how='left')
-            # tmp = preparing.scrape_info_of_start(d)
-            # d = d.merge(tmp, on=['race_id', '馬番'], how='left')
-            # d = d.set_index('race_id')
+            d1 = feature_enginnering_shutuba.featured_data.merge(add_df, on=['race_id', '馬番'], how='left')
+            tmp = preparing.scrape_info_of_start(d1)
+            d1 = d1.merge(tmp, on=['race_id', '馬番'], how='left')
+            d1 = d1.set_index('race_id')
             # d1 = preparing.trim_cols(d)
             # d1 = preparing.drop_horseid(d1)
-            d1 = preparing.adjust_cols(d)
+            d1 = preparing.adjust_cols(d1)
             nisai = d1['2歳戦'].iloc[0]
             hinba = d1['牝馬限定'].iloc[0]
 
             print(f"nisai {nisai} hinba {hinba}")
-            print(d1)
-            d2 = d1
-            d3 = d1
-            d4 = d1
+
             X1 = d1.drop(['date'], axis=1).reindex(columns=keiba_ai._KeibaAI__datasets.X_test.columns)
-            
-            X2 = d2.drop(['date'], axis=1).reindex(columns=keiba_ai2._KeibaAI__datasets.X_test.columns)
-            
-            X3 = d3.drop(['date'], axis=1).reindex(columns=keiba_ai3._KeibaAI__datasets.X_test.columns)
-            
-            X4 = d4.drop(['date'], axis=1).reindex(columns=keiba_ai4._KeibaAI__datasets.X_test.columns)
-            
-
-
             score_1 = keiba_ai.calc_score(X1, policies.BasicScorePolicy)
+            score_1.rename(columns={'score': 'score_x'}, inplace=True)
+            df_L3F = score_1.rename(columns={'score_x': 'L3F'}, inplace=True)
+            print(df_L3F)
+            df_L3F = preparing.add_L3F_features_2(df_L3F)
+            
+            d2 = d1.merge(df_L3F,  on=['馬番'], how='left')
+            print(d2)
+            
+            X2 = d1.drop(['date'], axis=1).reindex(columns=keiba_ai2._KeibaAI__datasets.X_test.columns)
+            
+            X3 = d1.drop(['date'], axis=1).reindex(columns=keiba_ai3._KeibaAI__datasets.X_test.columns)
+            
+            X4 = d1.drop(['date'], axis=1).reindex(columns=keiba_ai4._KeibaAI__datasets.X_test.columns)
+            
+            X5 = d2.drop(['date'], axis=1).reindex(columns=keiba_ai5._KeibaAI__datasets.X_test.columns)   # L3F 使用
+        
+            X6 = d1.drop(['date'], axis=1).reindex(columns=keiba_ai6._KeibaAI__datasets.X_test.columns)
+            
+
+
+            # score_1 = keiba_ai.calc_score(X1, policies.BasicScorePolicy)
             score_2 = keiba_ai2.calc_score(X2, policies.BasicScorePolicy)
             score_3 = keiba_ai3.calc_score(X3, policies.BasicScorePolicy)
             score_4 = keiba_ai4.calc_score(X4, policies.BasicScorePolicy)
+            score_5 = keiba_ai4.calc_score(X5, policies.BasicScorePolicy)
+            score_6 = keiba_ai4.calc_score(X6, policies.BasicScorePolicy)
             
             # scores_0 = score_1.merge(score_2, on=['race_id', '馬番'], how='left')
             # scores_0 = scores_0.merge(score_3, on=['race_id', '馬番'], how='left')
             # scores_0 = scores_0.merge(score_4, on=['race_id', '馬番'], how='left')
             
-            score_1.rename(columns={'score': 'score_x'}, inplace=True)
+            # score_1.rename(columns={'score': 'score_x'}, inplace=True)
             score_2.rename(columns={'score': 'score_y'}, inplace=True)
             score_3.rename(columns={'score': 'score_z'}, inplace=True)
             score_4.rename(columns={'score': 'score_w'}, inplace=True)
-            dfs = [score_1, score_2, score_3, score_4]
+            score_5.rename(columns={'score': 'score_v'}, inplace=True)
+            score_6.rename(columns={'score': 'score_u'}, inplace=True)
+            dfs = [score_1, score_2, score_3, score_4, score_5, score_6]
             # print(score_4)
             from functools import reduce
             scores_0 = reduce(lambda left, right: left.merge(right, on=['race_id', '馬番'], how='left'), dfs)
